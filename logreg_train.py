@@ -7,7 +7,7 @@ FILE_NAME = "dataset_train.csv"
 
 def sigmoid(z):
     """Apply sigmoid function while preventing overflow"""
-    z = np.clip(z, -500, 500)  # Prevents numerical instability
+    # z = np.clip(z, -500, 500)  # Prevents numerical instability
     return 1 / (1 + np.exp(-z))
 
 def logistic_regression(X, y, epochs, learning_rate):
@@ -36,32 +36,53 @@ def logistic_regression(X, y, epochs, learning_rate):
 
     return weight_tab, bias
 
+
+def predict(X, weights, bias):
+    """Compute probabilities and return the predicted house"""
+    predictions = []
+    for student in X:
+        z = np.dot(student, weights.T) + bias  # Linear combination with bias
+        probabilities = sigmoid(z)
+        predictions.append(np.argmax(probabilities, axis=0))  # Get class with highest probability
+    return predictions
+
+
+def compute_accuracy(true_labels, predicted_labels):
+    """Calculate accuracy percentage"""
+    correct = sum(1 for i in range(len(true_labels)) if true_labels[i] == predicted_labels[i])
+    return (correct / len(true_labels)) * 100
+
+
 if __name__ == "__main__":
     try:
         data = pd.read_csv(FILE_NAME)
 
         # Check for missing values before dropping them
         print("Missing values before dropna():", data.isnull().sum().sum())
-        data = data.dropna()  # Remove rows with missing values
 
-        epochs = 500
-        learning_rate = 0.1
+        epochs = 210
+        learning_rate = 10
 
         # Select features to use
         pair = ["Astronomy", "Herbology"]
+        data = data.dropna(subset = pair)  # Remove rows with missing values
         X = data[pair].values
 
         # Normalize data using MinMaxScaler
         scaler = MinMaxScaler()
         X = scaler.fit_transform(X)  # Store as NumPy array
 
+        test = {"Gryffindor":0, "Ravenclaw":1, "Slytherin":2, "Hufflepuff":3}
         y = data["Hogwarts House"].values
-
+        t = [test[house] for house in y]
         # Train the model
         weight_tab, bias = logistic_regression(X, y, epochs, learning_rate)
 
         print("Weights:\n", weight_tab)
         print("Bias:\n", bias)
+        predictions = predict(X, weight_tab, bias)
+        print(compute_accuracy(t, predictions))
+
 
         # Save parameters to a CSV file
         with open('thetas.csv', mode='w', newline='') as file:

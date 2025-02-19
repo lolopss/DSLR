@@ -3,9 +3,8 @@ import sys
 
 def compute_accuracy(true_labels, predicted_labels):
     """Calculate accuracy percentage"""
-    correct = sum(true == pred for true, pred in zip(true_labels, predicted_labels))
-    total = len(true_labels)
-    return (correct / total) * 100
+    correct = sum(1 for i in range(len(true_labels)) if true_labels[i] == predicted_labels[i])
+    return (correct / len(true_labels)) * 100
 
 DATASET_TEST = "dataset_train.csv"
 PREDICTIONS = "houses.csv"
@@ -14,6 +13,7 @@ if __name__ == "__main__":
     try:
         # Load actual labels from dataset_test.csv
         test_data = pd.read_csv(DATASET_TEST)
+        test_data = test_data.dropna()  
         if "Hogwarts House" not in test_data.columns:
             print("Error: The test dataset does not contain actual house labels.")
             sys.exit(1)

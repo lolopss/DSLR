@@ -11,18 +11,20 @@ house_names = ["Gryffindor", "Ravenclaw", "Slytherin", "Hufflepuff"]
 
 def predict(X, weights, bias):
     """Compute probabilities and return the predicted house"""
-    z = np.dot(X, weights.T) + bias  # Linear combination with bias
-    probabilities = sigmoid(z)
-    predictions = np.argmax(probabilities, axis=1)  # Get class with highest probability
+    predictions = []
+    for student in X:
+        z = np.dot(student, weights.T) + bias  # Linear combination with bias
+        probabilities = sigmoid(z)
+        predictions.append(np.argmax(probabilities, axis=0))  # Get class with highest probability
     return predictions
 
 if __name__ == "__main__":
     try:
         # Load test dataset
         test_data = pd.read_csv(DATASET)
-
+        test_data = test_data.dropna()
         # Select the same features used during training
-        X = test_data[["Defense Against the Dark Arts", "Herbology"]].values
+        X = test_data[["Astronomy", "Herbology"]].values
         scaler = MinMaxScaler()
         X = scaler.fit_transform(X) # Normalize data
 
@@ -31,9 +33,10 @@ if __name__ == "__main__":
             reader = csv.reader(file)
             theta_data = np.array([list(map(float, row)) for row in reader])
 
-        # Separate weights and bias
         weights = theta_data[:, :-1]  # All columns except last one
         bias = theta_data[:, -1]  # Last column
+        print(weights)
+        print(bias)
 
         # Make predictions
         predictions = predict(X, weights, bias)
